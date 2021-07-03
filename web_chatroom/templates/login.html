@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>登录</title>
+</head>
+<form method="POST">
+    <!--启动CSRF-->
+    {{form.hidden_tag()}}
+    <p>
+        用户：{{form.username(size=20,id='Username')}}
+        {%for e in form.username.errors%}
+        <span style="color: red">*{{e}}</span>
+        {%endfor%}
+    </p>
+    <p>
+        密码：{{form.password(size=20,id='Password')}}
+        {%for e in form.password.errors%}
+        <span style="color: red">*{{e}}</span>
+        {%endfor%}
+    </p>
+    <p>
+        <button style="float: right" type="submit">登录{{info}}</button>
+    </p>
+</form>
+
+</html>

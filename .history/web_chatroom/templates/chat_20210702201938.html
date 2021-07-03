@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>聊天室</title>
+  <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+  <script>
+
+    $(document).ready(function () {
+      namespace = '/message/';
+      var socket = io.connect(location.protocol + '//' + "localhost" + ':' + "9010");
+      //连接后发送日志
+      socket.on('connect', function () {
+        console.log('connected', location.protocol + '//' + "localhost" + ':' + "9010", '张三')
+        // socket.emit('connec', {
+        //   user_name: "张三"
+        // });
+      });
+  </script>
+</head>
+
+<body>
+  <form method="post" action="send_msg">
+    <textarea id="msg"></textarea>
+    <button id="btn" type="submit">發送</button>
+  </form>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <title>登录</title>
+</head>
+<form method="POST">
+    <!--启动CSRF-->
+    {{form.hidden_tag()}}
+    <p>
+        用户：{{form.name(size=20,id='name')}}
+        {%for e in form.name.errors%}
+        <span style="color: red">*{{e}}</span>
+        {%endfor%}
+    </p>
+    <p>
+        密码：{{form.password(size=20,id='password')}}
+
+        {%for e in form.password.errors%}
+        <span style="color: red">*{{e}}</span>
+        {%endfor%}
+    </p>
+    <p><button style="float: right" type="submit">登录</button></p>
+</form>
+<script type="text/javascript" src="/static/auth/js/jquery-2.1.4.min.js"></script>
+<script>
+    function myLogin() {
+        var data = {};
+        data['Username'] = $("#Username").val();
+        data['Password'] = $("#Password").val();
+        $.ajax(
+            {
+                type: 'POST',
+                url: "{{ url_for('auth.login') }}",
+                data: data,
+                success: function (re) {
+                    if (re == False) {
+                        alert("Invalid username or password.");
+                    } else if (re == True) {
+                        window.location.href = "{{ url_for('index') }}";
+                    }
+                },
+                error: function (xhr, type) {
+
+                }
+            }
+        );
+    }
+
+</script>
+</body>
+
+</html>

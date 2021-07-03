@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>聊天室</title>
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <!--    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <!-- ECharts 3 引入 -->
+    <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+</head>
+
+<body>
+    <div class="chatbox">
+        <div>
+            <img src="{{current_user.get_gravatar_url()}}" width="40" height="40" alt="" />
+            {{current_user.name}}
+        </div>
+    </div>
+    <div>
+        <div style="height:200px" id="message_box">
+        </div>
+        <div>
+            <form method="post">
+                <textarea id="msg"></textarea>
+                <button id="btn" type="submit">發送</button>
+            </form>
+        </div>
+    </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        // 建立socket连接，等待服务器推送数据，用回调函数更新图表
+        $(document).ready(function () {
+            namespace = '/msg';
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace)
+            socket.on('connect', () => {
+                document.querySelector("#btn").onclick = () => {
+                    const msg = document.querySelector('#msg').value;
+                    const post_time = new Date();
+                    socket.emit('client_send', {
+                        'name': '{{current_user.name}}',
+                        'avatar': '{{current_user.get_gravatar_url()}}',
+                        'msg': msg,
+                        'time': post_time.toLocaleDateString()
+                    });
+                    alert("send")
+                };
+            });
+            socket.on('server_response', function (res) {
+                alert(res.msg)
+                var htmlData = '<div class="msg_item fn-clear">'
+                    + '   <div class="uface"><img src="' + res.avatar + '" width="40" height="40"  alt=""/></div>'
+                    + '   <div class="item_right">'
+                    + '     <div class="msg own">' + res.msg + '</div>'
+                    + '     <div class="name_time">' + res.name + ' · ' + res.time + '</div>'
+                    + '   </div>'
+                    + '</div>';
+                $("#message_box").append(htmlData);
+                $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+            });
+        });
+
+    </script>
+</body>
+
+</html>

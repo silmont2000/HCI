@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>聊天室</title>
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <!--    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <!-- ECharts 3 引入 -->
+    <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+</head>
+
+<body>
+    <div class="chatbox">
+        <div class="chat_top fn-clear">
+            <div class="uinfo fn-clear" style="float: left;">
+                <div class="uface">
+                    <h1 style="color: #7777"><a href="/">Home</a>
+                    </h1>
+                </div>
+            </div>
+            <div class="uinfo fn-clear">
+                <div class="uface"><img src="{{ current_user.avater}}" width="40" height="40" alt="" /></div>
+                <div class="uname">
+                    {{ current_user.username }}
+                    <i class="fontico down"></i>
+                </div>
+            </div>
+        </div>
+        <div class="chat_message fn-clear">
+            <div class="chat_left">
+                <div class="message_box" id="message_box">
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
+                                height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg own"><img src="{{ url_for('static', filename='chat/images/hihi.jpg')}}"
+                                    width="400" height="400" alt="" /></div>
+                            <div class="name_time">小黄鸭 </div>
+                        </div>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
+                                height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg">Welcome to Hihi Chat Room. 欢迎来到 Hihi 聊天室。 </div>
+                            <div class="name_time">小黄鸭 </div>
+                        </div>
+                    </div>
+                    {% if msg_list %}
+                    {% for i in msg_list %}
+                    {% if i[0]['username'] == current_user.username %}
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ current_user.gravatar(name=i[0]['username'], size=40) }}"
+                                width="40" height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg">{{ i[0]['msg'] }}</div>
+                            <div class="name_time">你 · {{ i[1] }} </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ current_user.gravatar(name=i[0]['username'], size=40) }}"
+                                width="40" height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg">{{ i[0]['msg'] }}</div>
+                            <div class="name_time">{{ i[0]['username'] }} · {{ i[1] }} </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    {% else %}
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
+                                height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg">您还没有登陆，先和小黄鸭聊聊吧。 </div>
+                            <div class="name_time">小黄鸭 </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="write_box">
+                    {% if current_user.is_authenticated %}
+                    <textarea id="message" name="message" class="write_area" placeholder="和室友说点啥吧..."></textarea>
+                    <input type="hidden" name="fromname" id="fromname" value="{{ current_user.username }}" />
+                    {% else %}
+                    <textarea id="message_not" name="message" class="write_area"
+                        placeholder="还没登陆，还小黄鸭说点啥吧..."></textarea>
+                    {% endif %}
+
+                    <input type="hidden" name="to_uid" id="to_uid" value="0">
+                    <div class="facebox fn-clear">
+                        <div class="expression"></div>
+                        <div class="chat_type" id="chat_type">群聊</div>
+                        {% if current_user.is_authenticated %}
+                        <button name="login" class="sub_but" id="sub_but_login">提 交</button>
+                        {% else %}
+                        <button name="logout" class="sub_but" id="sub_but">提 交</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="chat_pleft">
+                <ul class="puser_list" title="" id="pchat">
+                    <li class="fn-clear selected"><em id="pall">所有私聊</em></li>
+                    <li class="fn-clear" data-id="112" id="private"><span></span><em>暂时没有任何私聊</em></li>
+                </ul>
+            </div>
+            <div class="chat_right">
+                <ul class="user_list" title="">
+                    <li class="fn-clear selected"><em id="all">所有用户</em></li>
+                    <li class="fn-clear" data-id="1"><span><img
+                                src="{{ url_for('static', filename='chat/images/hi.jpg')}}" width="30" height="30"
+                                alt="" /></span><em>小HI</em><small class="online" title="在线"></small></li>
+                    <li class="fn-clear" data-id="2"><span><img
+                                src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"
+                                alt="" /></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
+                    {% if current_user.is_authenticated %}
+                    {% for i in user_list %}
+                    {% if i == current_user.username %}
+                    {% if i in b_user_list %}
+                    <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(size=40) }}" width="30"
+                                height="30" alt="" /></span>uinfo fn-clear
+                        <em>{{ i }}</em><small class="offline" title="禁言"></small>
+                    </li>
+                    {% else %}
+                    <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(size=40) }}" width="30"
+                                height="30" alt="" /></span>
+                        <em>{{ i }}</em><small class="online" title="在线"></small>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    {% if i in b_user_list %}
+                    <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(name=i, size=40) }}"
+                                width="30" height="30" alt="" /></span>
+                        <em>{{ i }}</em>
+                        <small class="offline" title="禁言">
+                        </small>
+                    </li>
+                    {% else %}
+                    <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(name=i, size=40) }}"
+                                width="30" height="30" alt="" /></span>
+                        <em>{{ i }}</em>
+                        <small class="online" title="在线">
+                        </small>
+                    </li>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <li class="fn-clear" data-id="3">
+                        <span>
+                            <img src="{{ g }}" width="30" height="30" alt="" />
+                        </span>
+                        <em>游客</em>
+                        <small class="online" title="在线">
+                        </small>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <form method="post">
+        <textarea id="msg"></textarea>
+        <button id="btn" type="submit">發送</button>
+    </form>
+    <script type="text/javascript">
+
+        // 建立socket连接，等待服务器推送数据，用回调函数更新图表
+        $(document).ready(function () {
+            namespace = '/msg';
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace)
+            // const nsp = io.of(namespace);
+            // var socket = io.connect('http://localhost:3000/chat');
+            socket.on('connect', () => {
+                document.querySelector("#btn").onclick = () => {
+                    const msg = document.querySelector('#msg').value;
+                    const post_time = new Date();
+                    socket.emit('client_send', {
+                        'msg': msg
+                    });
+                };
+            });
+            socket.on('server_response', function (res) {
+                alert(res.data)
+            });
+
+
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>

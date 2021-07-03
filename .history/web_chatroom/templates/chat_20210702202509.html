@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>聊天室</title>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+  <script src="https://cdn.bootcss.com/socket.io/2.1.1/socket.io.js"></script>
+  <script>
+    var express = require('express');
+    var app = express();
+    var server = app.listen(1111);
+    var io = require('socket.io').listen(server);
+    // $(document).ready(function () {
+    //   namespace = '/message/';
+    //   var socket = io.connect(location.protocol + '//' + "localhost" + ':' + "9010");
+    //   //连接后发送日志
+    //   socket.on('connect', function () {
+    //     console.log('connected', location.protocol + '//' + "localhost" + ':' + "9010", '张三')
+    //   });
+    // })
+  </script>
+</head>
+
+<body>
+  <form method="post" action="send_msg">
+    <textarea id="msg"></textarea>
+    <button id="btn" type="submit">發送</button>
+  </form>
+</body>
+
+</html>

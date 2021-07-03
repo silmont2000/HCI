@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>系统监控走势图</title>
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <!--    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <!-- ECharts 3 引入 -->
+    <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+</head>
+
+<body>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+    <form method="post">
+        <textarea id="msg"></textarea>
+        <button id="btn" type="submit">發送</button>
+    </form>
+    <script type="text/javascript">
+
+        // 建立socket连接，等待服务器推送数据，用回调函数更新图表
+        $(document).ready(function () {
+            namespace = '//msg';
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace)
+            // const nsp = io.of(namespace);
+            // var socket = io.connect('http://localhost:3000/chat');
+            socket.on('connect', () => {
+                document.querySelector("#btn").onclick = () => {
+                    const msg = document.querySelector('#msg').value;
+                    const post_time = new Date();
+                    socket.emit('client_send', {
+                        'msg': msg
+                    });
+                };
+            });
+            socket.on('server_response', function (res) {
+                alert(res.data)
+            });
+
+
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
