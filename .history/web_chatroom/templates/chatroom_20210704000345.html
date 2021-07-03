@@ -33,7 +33,7 @@
 
     <script type="text/javascript">
         namespace = '/msg';
-        var socket = io.connect('https://webchat4hci.herokuapp.com' + namespace);
+        var socket = io.connect(‘https://webchat4hci.herokuapp.com’ + namespace);
         console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace)
         document.querySelector("#btn").onclick = () => {
             const msg = document.querySelector('#msg').value;
