@@ -19,8 +19,6 @@ def create_app():
     app.debug = True
     # 必須先配置再綁定db和app
     app.config.from_object(Config)
-    # app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(os.path.dirname(app.root_path),
-    #                                                               os.getenv('DATABASE_FILE', "sqlite:///auth.sqlite3"))
     # 延迟初始化
     db.init_app(app)
     login_manager.init_app(app)  # 初始化应用

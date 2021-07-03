@@ -1,12 +1,6 @@
 import os
-from sys import prefix
-
-from flask import Flask
-
-
 __all__ = ['Config']
 
-from app import app
 
 
 class Config(object):
