@@ -16,7 +16,7 @@ def index():
     return render_template('index.html')
 
 
-@socketio.on("client_send", namespace='/msg')
+@socketio.on("client_send")
 def client_send(data):
     if data['msg'] != '':
         emit('server_response',
