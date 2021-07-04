@@ -1,10 +1,15 @@
+import json
+
 from flask import render_template
 from flask_socketio import SocketIO, emit
 from web_chatroom import create_app, r
 from flask import current_app
 
+from web_chatroom.capture import get_emo, VideoCamera
+
 app = create_app()
-socketio = SocketIO(app)
+# eventlet用来防阻塞
+socketio = SocketIO(app, async_mode='eventlet')
 
 
 # log = current_app.logger
@@ -38,6 +43,8 @@ def join_room(data):
     value = r.smembers('roommate')
     current_app.logger.debug('目前在线：%s', value)
     current_app.logger.debug('新id：%s', data['id'])
+    # current_app.logger.debug(*get_emo(VideoCamera()))
+    emit('add', {'name': data['name']}, broadcast=True)
 
 
 @socketio.on("client_disconnect")
@@ -50,4 +57,6 @@ def leave_room(data):
 
 
 if __name__ == '__main__':
+    # 流媒体，开一下多线程，要不接不到包卡死
+    # app.run(threaded=True)
     socketio.run(app, debug=True)

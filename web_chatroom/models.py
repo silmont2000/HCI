@@ -1,4 +1,6 @@
 import hashlib
+
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -39,6 +41,7 @@ class User(UserMixin, db.Model):
         '''
         if username == '':
             username = self.name
+        current_app.logger.debug("username is %s", username)
         m5 = hashlib.md5(f'{username}'.encode('utf-8')).hexdigest()  # 返回16进制摘要字符串
         url = f'http://fdn.geekzu.org/avatar/{m5}?s={size}&d=identicon'
         return url

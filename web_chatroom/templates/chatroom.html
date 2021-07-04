@@ -15,74 +15,78 @@
 {% block content %}
 
 <body>
-<h1>ROOM: {{ rname }}</h1>
-<div class="chatbox">
-    <div class="chat_top fn-clear">
-        <div class="uinfo fn-clear" style="float: left;">
-            <div class="uface">
-                <h1 style="color: #7777"><a href="/">Home</a>
-                </h1>
+    <h1>ROOM: {{ rname }}</h1>
+    <div class="chatbox">
+        <div class="chat_top fn-clear">
+            <div class="uinfo fn-clear" style="float: left;">
+                <div class="uface">
+                    <h1 style="color: #7777"><a href="/">Home</a>
+                    </h1>
+                </div>
+            </div>
+            <div class="uinfo fn-clear">
+                <img src="{{current_user.get_gravatar_url()}}" width="40" height="40" alt="" />
+                <div class="uname">
+                    {{ current_user.name }}
+                </div>
+                <a href="/">
+                    <button id='user_avatar'>退出</button>
+                </a>
             </div>
         </div>
-        <div class="uinfo fn-clear">
-            <img src="{{current_user.get_gravatar_url()}}" width="40" height="40" alt=""/>
-            <div class="uname">
-                {{ current_user.name }}
-            </div>
-            <a href="/">
-                <button id='user_avatar'>退出</button>
-            </a>
-        </div>
-    </div>
-    <div class="chat_message fn-clear">
-        <div class="chat_left">
-            <div class="message_box" id="message_box">
-                <div class="msg_item fn-clear">
-                    <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
-                                            height="40" alt=""/></div>
-                    <div class="item_right">
-                        <div class="msg">Welcome to Hihi Chat Room. 欢迎来到聊天室。</div>
-                        <div class="name_time">小黄鸭</div>
+        <div class="chat_message fn-clear">
+            <div class="chat_left">
+                <div class="message_box" id="message_box">
+                    <div class="msg_item fn-clear">
+                        <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
+                                height="40" alt="" /></div>
+                        <div class="item_right">
+                            <div class="msg">Welcome to Hihi Chat Room. 欢迎来到聊天室。</div>
+                            <div class="name_time">小黄鸭</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="write_box">
+                    <form method="post">
+                        <textarea id="msg" name="message" class="write_area" placeholder="和室友说点啥吧..."></textarea>
+                    </form>
+
+                    <input type="hidden" name="to_uid" id="to_uid" value="0">
+                    <div class="facebox fn-clear">
+                        <div class="expression"></div>
+                        <input id="btn" type="submit">
                     </div>
                 </div>
             </div>
-            <div class="write_box">
-                <form method="post">
-                    <textarea id="msg" name="message" class="write_area" placeholder="和室友说点啥吧..."></textarea>
-                </form>
-
-                <input type="hidden" name="to_uid" id="to_uid" value="0">
-                <div class="facebox fn-clear">
-                    <div class="expression"></div>
-                    <input id="btn" type="submit">
-                </div>
+            <div class="chat_right">
+                <ul class="user_list" title="">
+                    <li class="fn-clear selected"><em id="all">所有用户</em></li>
+                    <li class="fn-clear" data-id="2"><span><img
+                                src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"
+                                alt="" /></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
+                    <div id='ulist'>
+                        {% for i in user_list %}
+                        <li class="fn-clear" id="{{i}}">
+                            <span>
+                                <img src="{{ current_user.get_gravatar_url(i, 40) }}" width="30" height="30" alt="" />
+                            </span>
+                            <em>{{ i }}</em>
+                            <small class="online" title="在线">
+                            </small>
+                        </li>
+                        {% endfor %}
+                    </div>
+                    <!-- 他妈的，切不可图省事 -->
+                    <!-- <div id='emopic'></div> -->
+                    <!-- <img id='emopic' style="height: 120px;"> -->
+                    <!-- <img id='emopic' style="height: 120px;" src="{{ url_for('capture.video') }}"> -->
+                    <div id='emo'></div>
+                </ul>
             </div>
         </div>
-        <div class="chat_right">
-            <ul class="user_list" title="">
-                <li class="fn-clear selected"><em id="all">所有用户</em></li>
-                <li class="fn-clear" data-id="2"><span><img
-                        src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"
-                        alt=""/></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
-
-                {% for i in user_list %}
-                <li class="fn-clear" id="{{i}}">
-                        <span>
-                            <img src="{{ current_user.get_gravatar_url(i, 40) }}" width="30" height="30" alt=""/>
-                        </span>
-                    <em>{{ i }}</em>
-                    <small class="online" title="在线">
-                    </small>
-                </li>
-                {% endfor %}
-                <img src="{{ url_for('capture.video') }}" style="height:120px">
-                <text src="{{url_for('capture.emo')}}"></text>
-            </ul>
-        </div>
     </div>
-</div>
 
-<script type="text/javascript">
+    <script type="text/javascript">
         namespace = '/msg';
         var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
         document.querySelector("#btn").onclick = () => {
@@ -119,6 +123,27 @@
             const m = document.getElementById(id)
             m.parentNode.removeChild(m);
         })
+        socket.on('add', function (data) {
+            const id = data['name']
+            console.log(id)
+            if (id != '{{current_user.name}}') {
+                const htmlData = '<li class="fn-clear" id=' + data["name"] + '>'
+                    + '<span>'
+                    + '    <img src="{{ current_user.get_gravatar_url(id, 40) }}" width="30" height="30" alt="" />'
+                    + '</span>'
+                    + '<em>' + data["name"] + '</em>'
+                    + '<small class="online" title="在线">'
+                    + '</small>'
+                    + '</li>'
+                $("#ulist").append(htmlData);
+            }
+        })
+        // socket.on('setdata', function (data) {
+        //     const emo = data['emo']
+        //     console.log(emo)
+        //     const m = document.getElementById('emo')
+        //     m.innerHTML = emo
+        // })
 
         document.querySelector("#user_avatar").onclick = () => {
             const msg = document.querySelector('#msg').value;
@@ -128,8 +153,46 @@
             });
         };
 
+        // 轮询
+        function get_emo() {
+            // console.log('arg')
+            $.ajax({
+                url: "{{ url_for('capture.emo') }}",
+                type: "GET",
+                dataType: "json",
+                success: function (arg) {
+                    // console.log(arg)
+                    $.each(arg, function (k, v) {     // 循环遍历    "1":{"name":"小黑","count":1}  键为前者，值为后者
+                        var li = document.createElement('li');   // 创建li标签
+                        li.innerText = k + "(" + v + ')';   // 生成新的DOM
+                        $('#emo').append(li);  // 添加该标签
+                    })
+                },
+                error: function (xhr, type) {
+                    console.log(xhr, type)
+                }
+            })
+        }
 
-
-</script>
+        function get_pic() {
+            console.log('arg')
+            $.ajax({
+                url: "{{ url_for('capture.video') }}",
+                type: "GET",
+                contentType: 'image/jpeg',
+                success: function (arg) {
+                    console.log("getPic", arg)
+                    $('#emopic').append(arg);  // 添加该标签
+                    // $('#emopic').attr('src', "{{ url_for('capture.video') }}");
+                },
+                error: function (xhr, type) {
+                    console.log(xhr, type)
+                }
+            })
+        }
+        setInterval(get_emo, 1000);
+        // 20fps
+        // setInterval(get_pic, 500);
+    </script>
 </body>
 {% endblock %}

@@ -67,7 +67,8 @@ class VideoCamera(object):
         success, image = self.video.read()
         # 将图片转码成jpg
         ret, jpeg = cv2.imencode('.jpg', image)
-        return jpeg.tobytes()
+        return jpeg
+        # return jpeg.tobytes()
 
     def get_frame_pic(self):
         success, image = self.video.read()
@@ -81,24 +82,29 @@ def get_pic(camera):
         # 注意Flask 要求视图函数返回的结果是可调用的
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+    # yield frame
 
 
 def get_emo(camera):
-    while True:
-        res, emotion, face_pos = dataProcess.getList(camera.get_frame_pic())
-        if res:
-            # print(emotion)
-            # print(json.dumps(emotion))
-            yield json.dumps(emotion)
+    # while True:
+    # 注意这里，while 1 会和轮询死循环
+    res, emotion, face_pos = dataProcess.getList(camera.get_frame_pic())
+    if res:
+        # print(emotion)
+        # print(json.dumps(emotion))
+        yield json.dumps(emotion)
+        # yield emotion
 
 
 @capture.route('/video')  # 这个地址返回视频流响应
 def video():
     # 视图函数的返回值会被自动转换为一个响应对象 mimetype控制contentType。
     # 不能传递音频，替换式的相应
-    return Response(get_pic(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(get_pic(VideoCamera()))
+    # return Response(get_pic(VideoCamera()), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@capture.route('/emo')  # 这个地址分析情绪
+@capture.route('/emo', methods=['GET'])  # 这个地址分析情绪
 def emo():
+    # current_app.logger.debug('%s', type(Response(get_emo(VideoCamera()))))
     return Response(get_emo(VideoCamera()))
