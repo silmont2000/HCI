@@ -21,4 +21,3 @@ flask_bootstrap
 numpy
 opencv-python
 keras
-json

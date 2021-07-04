@@ -23,7 +23,7 @@ class DataProcess:
     def getList(self, image):
         # resize: maintains the aspect ratio
         image = imutils.resize(image, width=200)
-        print("image size:", image.shape)
+        # print("image size:", image.shape)
         # bgr->gray
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # detect face position (x,y,w,h)
@@ -42,21 +42,15 @@ class DataProcess:
             roi = np.expand_dims(roi, axis=0)
 
             # predict via model
-            preds = emotion_classifier.predict(roi)[0]  # result list
+            preds = emotion_classifier.predict(roi)  # result list
             # 返回一下脸位置
             # face_restored_pos =[faces[0]/]
-            return True, preds, faces
+            # print(EMOTIONS)
+            # print(preds)
+            dictionary = dict(zip(EMOTIONS, preds[0].tolist()))
+            return True, dictionary, faces
         else:
-            return False, [], []
-
-    def getMaxEmotion(self, image):
-        prob_res, prob_list, faces = self.getList(image)
-        if prob_res:
-            label = EMOTIONS[prob_list.argmax()]  # 比例最大的表情
-            print(faces)
-            return True, label, faces
-        else:
-            return False, '', []
+            return False, {}, []
 
 
 dataProcess = DataProcess()
@@ -91,9 +85,10 @@ def get_pic(camera):
 
 def get_emo(camera):
     while True:
-        res, emotion, face_pos = dataProcess.getMaxEmotion(camera.get_frame_pic())
+        res, emotion, face_pos = dataProcess.getList(camera.get_frame_pic())
         if res:
-            print(emotion)
+            # print(emotion)
+            # print(json.dumps(emotion))
             yield json.dumps(emotion)
 
 
