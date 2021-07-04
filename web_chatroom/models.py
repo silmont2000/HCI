@@ -1,9 +1,8 @@
 import hashlib
-
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from . import db, login_manager
+from . import db, r
 
 
 class User(UserMixin, db.Model):
@@ -28,7 +27,7 @@ class User(UserMixin, db.Model):
         """获取用户ID"""
         return self.id
 
-    def get_gravatar_url(username, size=40):
+    def get_gravatar_url(self, username='', size=40):
         """返回头像url"""
         styles = ['identicon', 'monsterid', 'wavatar', 'retro']
         '''
@@ -38,8 +37,10 @@ class User(UserMixin, db.Model):
         wavatar:：用不同面容和背景组合生成的面孔头像。
         retro：程序生成的8位街机像素头像。
         '''
+        if username == '':
+            username = self.name
         m5 = hashlib.md5(f'{username}'.encode('utf-8')).hexdigest()  # 返回16进制摘要字符串
-        url = f'http://fdn.geekzu.org/avatar/{m5}?s={size}&d=monsterid'
+        url = f'http://fdn.geekzu.org/avatar/{m5}?s={size}&d=identicon'
         return url
 
     def verify_password(self, password):
@@ -53,9 +54,9 @@ class User(UserMixin, db.Model):
 
 
 def init_db():
+    db.drop_all()
     db.create_all()
-
-    # 測試
+    # 测试
     del_user = User.query.filter_by(name='test')
     for i in del_user:
         db.session.delete(i)
@@ -64,3 +65,10 @@ def init_db():
     new_user = User('test', '1')
     db.session.add(new_user)
     db.session.commit()
+
+
+def init_msg():
+    # 默认连接池
+    r.flushdb()
+    r.set('msg', 'flushed msgDB')
+    value = r.get('msg')

@@ -6,27 +6,32 @@ from werkzeug.utils import redirect
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, ValidationError
 from . import db, login_manager
-from .models import User, init_db
+from .models import User, init_db, init_msg
 from flask_wtf import FlaskForm
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('username', validators=[DataRequired()])
+    password = PasswordField('password', validators=[DataRequired()])
     password2 = PasswordField(
-        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Register')
+        'repeat password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('register')
 
-    def validate_username(self, username):
-        user = User.query.filter_by(name=username.data).first()
+    def validate_username(self, name):
+        user = User.query.filter_by(name=name.data).first()
         if user is not None:
-            raise ValidationError('Please use a different username.')
+            raise ValidationError('换个名字吧！')
 
 
 class LoginForm(FlaskForm):
     username = StringField('username', validators=[DataRequired()])
     password = PasswordField('password', validators=[DataRequired()])
     submit = SubmitField('login')
+
+    def validate_username(self, name):
+        user = User.query.filter_by(name=name.data).first()
+        if user is None:
+            raise ValidationError('您还没有注册！')
 
 
 auth = Blueprint('auth', __name__)
@@ -39,21 +44,28 @@ def create_db():
     return "OK"
 
 
+# 初始化用
+@auth.route('/msg', methods=['GET', 'POST'])
+def create_msgdb():
+    init_msg()
+    return "OK"
+
+
 @auth.route('/login', methods=['GET', "POST"], endpoint='login')
 def login():
     login_form = LoginForm()
     if request.method == 'GET':
-        return render_template('login.html', form=login_form, info='0')
-    elif request.method == 'POST':
-        if login_form.validate_on_submit():
-            name = login_form.username.data
-            password = login_form.password.data
-            user = User.query.filter_by(name=name).first()
-            if user.verify_password(password=password):
-                login_user(user)
-                return redirect(url_for("chat.chatroom"))
-            else:
-                return render_template('/login.html', form=login_form, info=name)
+        return render_template('login.html', form=login_form)
+    elif login_form.validate():
+        name = login_form.username.data
+        password = login_form.password.data
+        user = User.query.filter_by(name=name).first()
+        if user.verify_password(password=password):
+            login_user(user)
+            return redirect(url_for("chat.chatroom"))
+        else:
+            login_form.password.errors.append('密码错误！')
+    return render_template('/login.html', form=login_form)
 
 
 @auth.route('/register', methods=['GET', "POST"], endpoint='register')
@@ -61,12 +73,14 @@ def register():
     register_form = RegistrationForm()
     if request.method == 'GET':
         return render_template('register.html', form=register_form)
-    else:
+    elif register_form.validate():
         name = register_form.username.data
         password = register_form.password.data
         db.session.add(User(name, password))
         db.session.commit()
         return redirect(url_for('auth.login'))
+    else:
+        return render_template('register.html', form=register_form)
 
 
 @auth.route('/logout')

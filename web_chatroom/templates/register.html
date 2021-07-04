@@ -1,33 +1,55 @@
 ﻿<!DOCTYPE html>
 <html>
-
 <head>
-    <title>注册</title>
-</head>
-<form method="POST">
-    <!--启动CSRF-->
-    {{form.hidden_tag()}}
-    <p>
-        用户：{{form.username(size=20,id='Username')}}
-        {%for e in form.username.errors%}
-        <span style="color: red">*{{e}}</span>
-        {%endfor%}
-    </p>
-    <p>
-        密码：{{form.password(size=20,id='Password')}}
-        {%for e in form.password.errors%}
-        <span style="color: red">*{{e}}</span>
-        {%endfor%}
-    </p>
-    <p>
-        确认密码：{{form.password2(size=20,id='Password')}}
-        {%for e in form.password.errors%}
-        <span style="color: red">*{{e}}</span>
-        {%endfor%}
-    </p>
-    <p>
-        <button style="float: right" type="submit">注册</button>
-    </p>
-</form>
+    <title>WebChat for HCI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
+    <!-- Custom Theme files -->
+    <link href="/static/auth/css/font-awesome.min.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/static/auth/css/snow.css" rel="stylesheet" type="text/css" media="all"/>
+    <link href="/static/auth/css/style.css" rel="stylesheet" type="text/css" media="all"/>
+    <!-- //Custom Theme files -->
+
+</head>
+
+<body>
+<div class="top-buttons-agileinfo">
+    <!--<a href="index.html"  class="active">登录</a><a href="signup.html">注册</a>-->
+</div>
+<h1>先进行一个册的注</h1>
+<div class="main-agileits">
+    <div class="form-w3-agile">
+        <form method="POST">
+            <!--启动CSRF-->
+            {{form.hidden_tag()}}
+            <p>
+                用户名
+                {{form.username(size=20,id='username')}}
+                {%for e in form.username.errors%}
+                <span style="color: red">*{{e}}</span>
+                {%endfor%}
+            </p>
+            <p>
+                密码
+                {{form.password(size=20,id='password')}}
+                {%for e in form.password.errors%}
+                <span style="color: red">*{{e}}</span>
+                {%endfor%}
+            </p>
+            <p>
+                确认密码
+                {{form.password2(size=20,id='repeat password')}}
+                {%for e in form.password.errors%}
+                <span style="color: red">*{{e}}</span>
+                {%endfor%}
+            </p>
+            <div class="submit-w3l">
+                <p>{{ form.submit() }}</p>
+            </div>
+        </form>
+    </div>
+</div>
+</script>
+</body>
 </html>

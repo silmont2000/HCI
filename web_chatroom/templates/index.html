@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
+{% extends "base.html" %}
 
-<body>
-<p><a href="{{ url_for('auth.login') }}">login</a></p>
-<p><a href="{{ url_for('auth.register') }}">register</a></p>
-</body>
-
-</html>
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>你又来做作业啦 {{ current_user.username }}</h1>
+    </div>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-default" role="button">登录</a>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-default" role="button">注册</a>
+</div>
+{% endblock %}

@@ -16,3 +16,9 @@ Werkzeug
 WTForms
 eventlet
 gunicorn
+redis
+flask_bootstrap
+numpy
+opencv-python
+keras
+json

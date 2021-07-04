@@ -1,40 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Kung Fu Realm{%endblock %}
+{% block head %}
 
 <head>
     <meta charset="utf-8">
-    <title>聊天室</title>
-    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
-    <!--    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>-->
+    <title>WebChat for HCI</title>
+    <link id="css" type="text/css" rel="stylesheet" href="/static/chat/css/style.css">
+    <script type="text/javascript" src="{{ url_for('static', filename='chat/js/jquery.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
-    <!-- ECharts 3 引入 -->
-    <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
 </head>
+{% endblock %}
+{% block content %}
 
 <body>
-    <div class="chatbox">
-        <div>
-            <img src="{{current_user.get_gravatar_url()}}" width="40" height="40" alt="" />
-            {{current_user.name}}
+<h1>ROOM: {{ rname }}</h1>
+<div class="chatbox">
+    <div class="chat_top fn-clear">
+        <div class="uinfo fn-clear" style="float: left;">
+            <div class="uface">
+                <h1 style="color: #7777"><a href="/">Home</a>
+                </h1>
+            </div>
+        </div>
+        <div class="uinfo fn-clear">
+            <img src="{{current_user.get_gravatar_url()}}" width="40" height="40" alt=""/>
+            <div class="uname">
+                {{ current_user.name }}
+            </div>
+            <a href="/">
+                <button id='user_avatar'>退出</button>
+            </a>
         </div>
     </div>
-    <div>
-        <div style="height:200px" id="message_box">
-        </div>
-        <div>
-            <form method="post">
-                <textarea id="msg"></textarea>
-                <button id="btn" type="submit">發送</button>
-            </form>
-        </div>
-    </div>
+    <div class="chat_message fn-clear">
+        <div class="chat_left">
+            <div class="message_box" id="message_box">
+                <div class="msg_item fn-clear">
+                    <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40"
+                                            height="40" alt=""/></div>
+                    <div class="item_right">
+                        <div class="msg">Welcome to Hihi Chat Room. 欢迎来到聊天室。</div>
+                        <div class="name_time">小黄鸭</div>
+                    </div>
+                </div>
+            </div>
+            <div class="write_box">
+                <form method="post">
+                    <textarea id="msg" name="message" class="write_area" placeholder="和室友说点啥吧..."></textarea>
+                </form>
 
-    </div>
+                <input type="hidden" name="to_uid" id="to_uid" value="0">
+                <div class="facebox fn-clear">
+                    <div class="expression"></div>
+                    <input id="btn" type="submit">
+                </div>
+            </div>
+        </div>
+        <div class="chat_right">
+            <ul class="user_list" title="">
+                <li class="fn-clear selected"><em id="all">所有用户</em></li>
+                <li class="fn-clear" data-id="2"><span><img
+                        src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"
+                        alt=""/></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
 
-    <script type="text/javascript">
+                {% for i in user_list %}
+                <li class="fn-clear" id="{{i}}">
+                        <span>
+                            <img src="{{ current_user.get_gravatar_url(i, 40) }}" width="30" height="30" alt=""/>
+                        </span>
+                    <em>{{ i }}</em>
+                    <small class="online" title="在线">
+                    </small>
+                </li>
+                {% endfor %}
+                <img src="{{ url_for('capture.video') }}" style="height:120px">
+                <text src="{{url_for('capture.emo')}}"></text>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
         namespace = '/msg';
-        var socket = io.connect();
-        console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace)
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
         document.querySelector("#btn").onclick = () => {
             const msg = document.querySelector('#msg').value;
             const post_time = new Date();
@@ -57,8 +107,29 @@
             $("#message_box").append(htmlData);
             $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
         });
+        socket.on('connect', function () {
+            socket.emit('client_connection', {
+                'name': '{{current_user.name}}',
+                'id': socket.id
+            })
+        })
+        socket.on('leave', function (data) {
+            const id = data['name']
+            console.log(id)
+            const m = document.getElementById(id)
+            m.parentNode.removeChild(m);
+        })
 
-    </script>
+        document.querySelector("#user_avatar").onclick = () => {
+            const msg = document.querySelector('#msg').value;
+            const post_time = new Date();
+            socket.emit('client_disconnect', {
+                'name': '{{current_user.name}}'
+            });
+        };
+
+
+
+</script>
 </body>
-
-</html>
+{% endblock %}
