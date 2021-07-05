@@ -21,4 +21,4 @@ flask_bootstrap
 numpy
 opencv-python
 keras
-tensorflow
+tensorflow-cpu
